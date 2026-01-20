@@ -9,6 +9,7 @@ import android.provider.Settings
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import android.app.Activity
 
 class AlarmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -73,13 +74,16 @@ class AlarmModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
 
     @ReactMethod
     fun checkAlarmTriggered(promise: com.facebook.react.bridge.Promise) {
-        val activity = currentActivity
-        if (activity != null && activity.intent.getBooleanExtra("ALARM_TRIGGERED", false)) {
-            // Reset the extra so it doesn't trigger again on reload
-            activity.intent.putExtra("ALARM_TRIGGERED", false)
-            promise.resolve(true)
-        } else {
-            promise.resolve(false)
+        val activity: Activity? = getCurrentActivity()
+        if (activity != null) {
+            val intent = activity.intent
+            if (intent != null && intent.getBooleanExtra("ALARM_TRIGGERED", false)) {
+                // Reset the extra so it doesn't trigger again on reload
+                intent.putExtra("ALARM_TRIGGERED", false)
+                promise.resolve(true)
+                return
+            }
         }
+        promise.resolve(false)
     }
 }
